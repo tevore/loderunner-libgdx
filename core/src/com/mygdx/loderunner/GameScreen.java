@@ -1,6 +1,7 @@
 package com.mygdx.loderunner;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -28,15 +29,13 @@ public class GameScreen implements Screen {
 
     Sprite king;
     Body kingBody;
+    float kingSpeed = 40f;
 
     public GameScreen(LodeRunner game) {
         this.game = game;
 
         textureAtlas = new TextureAtlas("char_pack.atlas");
-        ObjectSet<Texture> objSets = textureAtlas.getTextures();
-        System.out.println(objSets.size);
-        TextureRegion region = new TextureRegion(objSets.first(), 0, 42, 25, 25);
-        king = new Sprite(region);
+        king = new Sprite(textureAtlas.createSprite("king_2"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 200, 150);
@@ -63,14 +62,14 @@ public class GameScreen implements Screen {
         //to not rotate around the axis
 //        bolaBodyDef.fixedRotation = true;
         //TODO review this positional code
-        kingBD.position.set(king.getX()+59, king.getY()+40); //y was 20
+        kingBD.position.set(king.getX()+48, king.getY()+37); //y was 20
 
         kingBody = world.createBody(kingBD);
 
         //Useful for linking movement between rendered sprite and attached physics component
 //        padShape.setAsBox(9.5f, 2);
         PolygonShape kingShape = new PolygonShape();
-        kingShape.setAsBox(8, 9);
+        kingShape.setAsBox(8, 8);
 
         FixtureDef kingFD = new FixtureDef();
         kingFD.shape = kingShape;
@@ -100,11 +99,22 @@ public class GameScreen implements Screen {
         // tell the camera to update its matrices.
         camera.update();
 
+        kingBody.setLinearVelocity(new Vector2(0, 0));
+
+        //movements
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            kingBody.setLinearVelocity(kingSpeed, 0);
+        }
+
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            kingBody.setLinearVelocity(-kingSpeed, 0);
+        }
+
         world.step(Gdx.graphics.getDeltaTime(), 6, 2);
 
         game.batch.begin();
 
-        king.setPosition(40, 40);
+        king.setPosition(kingBody.getPosition().x-8, kingBody.getPosition().y+3);
         king.setOriginCenter();
 
         king.draw(game.batch);

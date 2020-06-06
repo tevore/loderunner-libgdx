@@ -9,6 +9,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -19,6 +23,9 @@ public class GameScreen implements Screen {
 
 
     final LodeRunner game;
+
+    TiledMap testMap;
+    TiledMapRenderer renderedMap;
 
     TextureAtlas textureAtlas;
 
@@ -34,11 +41,14 @@ public class GameScreen implements Screen {
     public GameScreen(LodeRunner game) {
         this.game = game;
 
+        testMap = new TmxMapLoader().load("inca_map_1.tmx");
         textureAtlas = new TextureAtlas("char_pack.atlas");
         king = new Sprite(textureAtlas.createSprite("king_2"));
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 200, 150);
+        camera.setToOrtho(false, 200, 150); //200, 150
+
+        renderedMap = new OrthogonalTiledMapRenderer(testMap);
 
 
         Box2D.init();
@@ -113,6 +123,12 @@ public class GameScreen implements Screen {
         world.step(Gdx.graphics.getDeltaTime(), 6, 2);
 
         game.batch.begin();
+
+        //tmx render
+        renderedMap.setView(camera);
+        renderedMap.render();
+
+
 
         king.setPosition(kingBody.getPosition().x-8, kingBody.getPosition().y+3);
         king.setOriginCenter();

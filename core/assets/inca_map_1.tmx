@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.5" orientation="orthogonal" renderorder="right-down" width="8" height="8" tilewidth="16" tileheight="16" infinite="0" nextlayerid="2" nextobjectid="1">
+<map version="1.2" tiledversion="1.3.5" orientation="orthogonal" renderorder="right-down" width="8" height="8" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="11">
  <tileset firstgid="1" source="inca_front.tsx"/>
  <layer id="1" name="Tile Layer 1" width="8" height="8">
   <data encoding="csv">
@@ -13,4 +13,11 @@
 11,12,11,12,11,12,11,12
 </data>
  </layer>
+ <objectgroup id="2" name="CollideLayer">
+  <object id="1" name="BottomPlatform" x="0.303803" y="96.3057" width="126.99" height="32.507"/>
+  <object id="3" name="TopPlatform" x="32.507" y="16.2535" width="63.343" height="15.1902"/>
+ </objectgroup>
+ <objectgroup id="3" name="InteractLayer">
+  <object id="10" x="96.3057" y="25.6714" width="9.56981" height="69.7229"/>
+ </objectgroup>
 </map>

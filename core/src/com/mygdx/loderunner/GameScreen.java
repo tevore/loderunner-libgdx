@@ -125,15 +125,14 @@ public class GameScreen implements Screen {
     private void setupStaticBoundsLayer() {
 
         MapObjects mapObjects = gameMap.getLayers().get("CollideLayer").getObjects();
-        for(MapObject m : mapObjects) {
-            Rectangle rectangle = ((RectangleMapObject)m).getRectangle();
+        for(MapObject mapObject : mapObjects) {
+            Rectangle rectangle = ((RectangleMapObject) mapObject).getRectangle();
 
-            //create a dynamic within the world body (also can be KinematicBody or StaticBody
             BodyDef bodyDef = new BodyDef();
+            bodyDef.fixedRotation = true;
             bodyDef.type = BodyDef.BodyType.StaticBody;
             Body body = world.createBody(bodyDef);
 
-            //create a fixture for each body from the shape
             PolygonShape shape = new PolygonShape();
             shape.setAsBox(rectangle.width*0.5f, rectangle.height*0.5f);
             Fixture fixture = body.createFixture(shape,10f);
@@ -175,6 +174,22 @@ public class GameScreen implements Screen {
             if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
                 kingBody.setLinearVelocity(0, 40);
             }
+        }
+
+        RayCastCallback rayCastCallback = new RayCastCallback() {
+            @Override
+            public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+                System.out.println(fixture.getBody().getPosition());
+                return 0;
+            }
+        };
+
+        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+            //destroy adjacent block in direction you are facing
+            //for now, we will do the space in front
+            //add to breakable list?
+            world.rayCast(rayCastCallback, kingBody.getPosition(), new Vector2(-1, -1));
+
         }
 
         world.step(Gdx.graphics.getDeltaTime(), 6, 2);

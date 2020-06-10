@@ -20,7 +20,7 @@ public class MainMenuScreen implements Screen {
         this.game = game;
         camera = new OrthographicCamera();
 
-        camera.setToOrtho(false, 200, 200);
+        camera.setToOrtho(false, 256, 256);
 
 //        gameFont = new BitmapFont(Gdx.files.classpath("raw/font-title.fnt"));
 //        gameFont.setColor(Color.WHITE);
@@ -44,8 +44,6 @@ public class MainMenuScreen implements Screen {
 
         game.batch.begin();
 
-//        gameFont.draw(game.batch, "BREAKOUT", 50, 100);
-//        gameFont.draw(game.batch, "Tap anywhere to begin...", 50, 90);
 
         game.font.draw(game.batch, "Welcome to LodeRunner!!! ", 25, 25);
         game.font.draw(game.batch, "Tap anywhere to begin!", 20, 20);

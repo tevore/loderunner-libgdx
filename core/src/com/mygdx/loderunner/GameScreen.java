@@ -24,12 +24,18 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 
+/* TODO
+   fix king body
+   fix physics ( again )
+   add pickups
+   add ground destruction ability
+ */
 public class GameScreen implements Screen {
 
 
     final LodeRunner game;
 
-    TiledMap testMap;
+    TiledMap gameMap;
     TiledMapRenderer renderedMap;
 
     TextureAtlas textureAtlas;
@@ -43,19 +49,21 @@ public class GameScreen implements Screen {
     Body kingBody;
     float kingSpeed = 40f;
 
-//    Body templeFloor;
+    Ladder ladder;
+
 
     public GameScreen(LodeRunner game) {
         this.game = game;
 
-        testMap = new TmxMapLoader().load("inca_map_1.tmx");
+
+        gameMap = new TmxMapLoader().load("inca_map_1.tmx");
         textureAtlas = new TextureAtlas("char_pack.atlas");
         king = new Sprite(textureAtlas.createSprite("king_2"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 256, 256); //200, 150
 
-        renderedMap = new OrthogonalTiledMapRenderer(testMap);
+        renderedMap = new OrthogonalTiledMapRenderer(gameMap);
 
 
         Box2D.init();
@@ -69,7 +77,9 @@ public class GameScreen implements Screen {
 
         setupKingBox();
 
-        setupGroundBox();
+        setupStaticBoundsLayer();
+
+        setupInteractLayer();
 
     }
 
@@ -80,19 +90,19 @@ public class GameScreen implements Screen {
         //to not rotate around the axis
 //        bolaBodyDef.fixedRotation = true;
 
-        kingBD.position.set(king.getX()+48, king.getY()+37); //y was 20
+        kingBD.position.set(king.getX() + 10, king.getY() + 40); //y was 20
 
         kingBody = world.createBody(kingBD);
 
         //Useful for linking movement between rendered sprite and attached physics component
 //        padShape.setAsBox(9.5f, 2);
         PolygonShape kingShape = new PolygonShape();
-        kingShape.setAsBox(8, 8);
+        kingShape.setAsBox(8, 12);
 
         FixtureDef kingFD = new FixtureDef();
         kingFD.shape = kingShape;
         kingFD.density = 1f;
-        kingFD.friction = 0.2f;
+        kingFD.friction = 0f;
         kingFD.restitution = 0f;
 
         kingBody.createFixture(kingFD);
@@ -101,10 +111,20 @@ public class GameScreen implements Screen {
         kingShape.dispose();
     }
 
-    private void setupGroundBox() {
+    private void setupInteractLayer() {
 
+        MapObjects mapObjects = gameMap.getLayers().get("InteractLayer").getObjects();
+        for(MapObject m : mapObjects) {
+            Rectangle rectangle = ((RectangleMapObject)m).getRectangle();
 
-        MapObjects mapObjects = testMap.getLayers().get("CollideLayer").getObjects();
+            ladder = new Ladder(rectangle);
+
+        }
+    }
+
+    private void setupStaticBoundsLayer() {
+
+        MapObjects mapObjects = gameMap.getLayers().get("CollideLayer").getObjects();
         for(MapObject m : mapObjects) {
             Rectangle rectangle = ((RectangleMapObject)m).getRectangle();
 
@@ -115,8 +135,6 @@ public class GameScreen implements Screen {
 
             //create a fixture for each body from the shape
             PolygonShape shape = new PolygonShape();
-            float tileSize = Float.valueOf(testMap.getProperties().get("tilewidth",Integer.class));
-            System.out.println("tile size: " + tileSize);
             shape.setAsBox(rectangle.width*0.5f, rectangle.height*0.5f);
             Fixture fixture = body.createFixture(shape,10f);
             fixture.setFriction(0.1F);
@@ -125,7 +143,7 @@ public class GameScreen implements Screen {
 
             shape.dispose();
         }
-        
+
     }
 
     @Override
@@ -142,7 +160,7 @@ public class GameScreen implements Screen {
         // tell the camera to update its matrices.
         camera.update();
 
-//        kingBody.setLinearVelocity(new Vector2(0, 0));
+        kingBody.setLinearVelocity(new Vector2(0, kingBody.getLinearVelocity().y));
 
         //movements
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
@@ -153,6 +171,12 @@ public class GameScreen implements Screen {
             kingBody.setLinearVelocity(-kingSpeed, kingBody.getLinearVelocity().y);
         }
 
+        if(ladder.getRectangle().overlaps(king.getBoundingRectangle())) {
+            if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
+                kingBody.setLinearVelocity(0, 40);
+            }
+        }
+
         world.step(Gdx.graphics.getDeltaTime(), 6, 2);
 
         //render tmx map first
@@ -161,8 +185,9 @@ public class GameScreen implements Screen {
 
         game.batch.begin();
 
-        king.setPosition(kingBody.getPosition().x-8, kingBody.getPosition().y+3);
         king.setOriginCenter();
+        king.setPosition(kingBody.getPosition().x-8, kingBody.getPosition().y-20);
+//        king.setOriginCenter();
 
         king.draw(game.batch);
 
